@@ -12,7 +12,7 @@ import { Layout, Text } from '@ui-kitten/components';
 import { MasterBottomBar, MasterStatusBar } from './src/components/status-bars';
 
 import { useAppStorageInit } from './src/app-storage/utils';
-import ApplicationProvider from './src/components/application-provider.component';
+import UIProvider from './src/components/ui-provider';
 import { HomeNavigator } from './src/screens/home/home.navigator';
 import { DimensionsProvider } from './src/components/dimensions-provider';
 
@@ -32,14 +32,13 @@ export default function App() {
    return (
       <NavigationContainer>
          <SafeAreaProvider>
-            <ApplicationProvider>
+            <UIProvider>
                <DimensionsProvider>
                   <MasterStatusBar />
                   <HomeNavigator />
-
                   <MasterBottomBar />
                </DimensionsProvider>
-            </ApplicationProvider>
+            </UIProvider>
          </SafeAreaProvider>
       </NavigationContainer>
    );

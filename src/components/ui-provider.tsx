@@ -1,5 +1,4 @@
 import * as eva from '@eva-design/eva';
-
 import {
    ApplicationProvider as KittenProvider,
    IconRegistry
@@ -11,7 +10,7 @@ import React from 'react';
 import AppStorage from '../app-storage/provider';
 import { StatusBarsProvider } from './status-bars';
 
-export default function ApplicationProvider({ children }) {
+export default function UIProvider({ children }) {
    const [theme] = AppStorage.useGlobal('uiTheme');
    return (
       <KittenProvider {...eva} theme={{ ...eva[theme], ...themey }}>
