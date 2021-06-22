@@ -1,5 +1,5 @@
 import * as eva from '@eva-design/eva';
-import { mapping } from '@eva-design/eva';
+
 import {
    ApplicationProvider as KittenProvider,
    IconRegistry
@@ -14,11 +14,7 @@ import { StatusBarsProvider } from './status-bars';
 export default function ApplicationProvider({ children }) {
    const [theme] = AppStorage.useGlobal('uiTheme');
    return (
-      <KittenProvider
-         mapping={mapping}
-         {...eva}
-         theme={{ ...eva[theme], ...themey }}
-      >
+      <KittenProvider {...eva} theme={{ ...eva[theme], ...themey }}>
          <IconRegistry icons={EvaIconsPack} />
          <StatusBarsProvider>{children}</StatusBarsProvider>
       </KittenProvider>
