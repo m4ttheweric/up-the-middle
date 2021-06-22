@@ -1,32 +1,36 @@
 {
-  "expo": {
-    "name": "up-the-middle",
-    "slug": "up-the-middle",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+   "expo": {
+      "name": "up-the-middle",
+      "slug": "up-the-middle",
+      "privacy": "public",
+      "platforms": ["ios", "android", "web"],
+      "version": "1.0.0",
+      "orientation": "portrait",
+      "icon": "./assets/icon.png",
+      "splash": {
+         "image": "./assets/splash.png",
+         "resizeMode": "contain",
+         "backgroundColor": "#ffffff"
+      },
+      "updates": {
+         "fallbackToCacheTimeout": 0
+      },
+      "assetBundlePatterns": ["**/*"],
+      "ios": {
+         "supportsTablet": true
+      },
+      "android": {
+         "adaptiveIcon": {
+            "foregroundImage": "./assets/adaptive-icon.png",
+            "backgroundColor": "#FFFFFF"
+         }
+      },
+      "web": {
+         "build": {
+            "babel": {
+               "include": ["static-container"]
+            }
+         }
       }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
-  }
+   }
 }
