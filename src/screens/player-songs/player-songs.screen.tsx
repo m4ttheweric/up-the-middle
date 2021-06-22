@@ -7,6 +7,9 @@ interface PlayerSongsScreenProps {}
 export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
    children
 }) => {
+   useEffect(() => {
+      console.log('welcome to songs!');
+   }, []);
    return (
       <Layout style={{ flex: 1 }}>
          <Toolbar title='Songs' />

@@ -15,7 +15,7 @@ import {
 } from '@ui-kitten/components';
 import React, { Fragment, useContext } from 'react';
 import { ImageProps, View } from 'react-native';
-import { useScreenSize } from '../utils/use-screen-size';
+import { useScreenSize } from '../utils/hooks';
 import { BackIcon, MoreVerticalIcon } from './icons';
 import { StatusBarContext } from './status-bars';
 
