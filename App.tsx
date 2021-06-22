@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
 
 // For some reason, starting from 0.61, react-native-gesture-handler throws this warning
 // https://github.com/facebook/react-native/issues/26226
-if (!(Platform.OS == 'web')) {
+if (Platform.OS !== 'web') {
    LogBox.ignoreLogs(['RCTRootView cancelTouches']);
    LogBox.ignoreLogs([
       'We found non-serializable values in the navigation state'

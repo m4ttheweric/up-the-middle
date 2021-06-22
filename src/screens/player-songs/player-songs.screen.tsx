@@ -13,7 +13,7 @@ export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
    return (
       <Layout style={{ flex: 1 }}>
          <Toolbar title='Songs' />
-         <Text>These are songs!</Text>
+         <Text>These are songsss!</Text>
       </Layout>
    );
 };
