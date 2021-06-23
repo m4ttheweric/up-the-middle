@@ -1,6 +1,6 @@
 import { Icon, IconProps } from '@ui-kitten/components';
 import React from 'react';
-import { DynamicIconNames, FinagleIconName } from '../../assets/icons';
+import { DynamicIconNames, FinagleIconName } from '../icons';
 import {
    KittenThemeColorNames,
    useKittenTheme
@@ -24,14 +24,6 @@ interface IconWrapperProps extends IconProps {
 const statusToColor = (status: Statuses = 'basic') =>
    status === 'control' ? 'color-control-default' : `color-${status}-500`;
 
-// {
-//    switch (status) {
-//       case 'control':
-//          return 'color-control-default'
-//       default:
-//          return `color-${status}-500`
-//    }
-// }
 export const IconTyped: React.FC<IconWrapperProps> = props => {
    const theme = useKittenTheme();
    return (

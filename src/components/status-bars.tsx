@@ -23,7 +23,7 @@ export const BottomBarContext = React.createContext<StatusBarContextState>({
 export const StatusBarsProvider: React.FC = ({ children }) => {
    const theme = useKittenTheme();
 
-   const DEFAULT_STATUS_BAR_COLOR = theme['color-primary-600'];
+   const DEFAULT_STATUS_BAR_COLOR = theme['color-primary-800'];
    const DEFAULT_BOTTOM_BAR_COLOR = theme['background-basic-color-1'];
 
    const [statusBarBackground, setStatusBarBackground] = useState(
