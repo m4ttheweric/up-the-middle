@@ -3,7 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DynamicIcon } from '../../components/icons';
 import { PlayerSongsScreen } from '../player-songs/player-songs.screen';
 import { HomeTabBar } from './tab-bar.component';
-import { SettingsScreen } from '../settings/settings.screen';
+import { RosterScreen } from '../roster/roster.screen';
+
 export const HomeTabs = createBottomTabNavigator();
 
 export const HomeNavigator = () => (
@@ -18,9 +19,14 @@ export const HomeNavigator = () => (
          options={{ tabBarIcon: DynamicIcon('music') }}
       />
       <HomeTabs.Screen
-         name={'settings'}
-         component={SettingsScreen}
-         options={{ tabBarIcon: DynamicIcon('settings') }}
+         name={'roster'}
+         component={RosterScreen}
+         options={{ tabBarIcon: DynamicIcon('person') }}
       />
+      {/* <HomeTabs.Screen
+         name={'player'}
+         component={ExpoAudioPlayer}
+         options={{ tabBarIcon: DynamicIcon('home') }}
+      /> */}
    </HomeTabs.Navigator>
 );

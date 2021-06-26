@@ -1,113 +1,58 @@
-import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableHighlight } from 'react-native';
-import { Layout, Button, Card } from '@ui-kitten/components';
+import { Layout } from '@ui-kitten/components';
+import React, { useState } from 'react';
+import { FlatList } from 'react-native';
 import { Toolbar } from '../../components/toolbar.component';
-import { Audio } from 'expo-av';
-import { DynamicIcon } from '../../components/icons';
-import { PLAYERS } from './song-data';
-import { Player } from './components/player';
-import { useKittenTheme } from '../../components/use-kitten-theme-wrapper';
-import { Ionicons } from '@expo/vector-icons';
+import { IPlayer, PLAYERS, Song } from '../../data/player-data';
+import { PlayerCard } from './components/player-card';
+import { SongPlayer } from './components/song-player';
+
 interface PlayerSongsScreenProps {}
+
+export const SongContext = React.createContext<{
+   currentSong: Song;
+   currentPlayer: IPlayer;
+   setCurrentPlayer: React.Dispatch<IPlayer>;
+   setCurrentSong: React.Dispatch<Song>;
+   isPlaying: boolean;
+   setIsPlaying: React.Dispatch<boolean>;
+}>({
+   currentSong: null,
+   currentPlayer: null,
+   setCurrentPlayer: null,
+   setCurrentSong: null,
+   isPlaying: false,
+   setIsPlaying: null
+});
 export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
    children
 }) => {
-   useEffect(() => {
-      console.log('welcome to songs!');
-   }, []);
+   const [currentSong, setCurrentSong] = useState<Song>(null);
+   const [currentPlayer, setCurrentPlayer] = useState<IPlayer>(null);
+   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
    return (
-      <Layout style={{ flex: 1 }}>
-         <Toolbar title='Songs' />
-         <FlatList
-            data={PLAYERS}
-            renderItem={({ item: p }) => (
-               <Player key={`${p.name}-${p.dob}`} player={p} />
-            )}
-            nestedScrollEnabled
-         />
-         <SongPlayer />
-      </Layout>
-   );
-};
-
-const SongPlayer: React.FC<{}> = () => {
-   const theme = useKittenTheme();
-   const [sound, setSound] = React.useState<Audio.Sound>(null);
-
-   async function handlePlayButton() {
-      if (sound == null) {
-         loadSound();
-         return;
-      }
-
-      const status = await sound.getStatusAsync();
-      if (status?.isLoaded) {
-         if (status.isPlaying) {
-            sound.pauseAsync();
-         } else {
-            sound.playAsync();
-         }
-      } else {
-         loadSound();
-      }
-   }
-
-   async function loadSound() {
-      const { sound } = await Audio.Sound.createAsync(
-         require('../../songs/dnl.m4a')
-      );
-      setSound(sound);
-
-      console.log('Playing Sound');
-      await sound.playAsync();
-   }
-   // async function playSound() {
-   //    console.log('Loading Sound');
-   //    const { sound } = await Audio.Sound.createAsync(
-   //       require('../../songs/dnl.m4a')
-   //    );
-   //    setSound(sound);
-
-   //    console.log('Playing Sound');
-   //    await sound.playAsync();
-   // }
-
-   React.useEffect(() => {
-      return sound
-         ? () => {
-              console.log('Unloading Sound');
-              sound.unloadAsync();
-           }
-         : undefined;
-   }, [sound]);
-
-   return (
-      <View
-         style={{
-            width: '100%',
-            backgroundColor: theme['color-basic-700'],
-            padding: 20
+      <SongContext.Provider
+         value={{
+            currentSong,
+            setCurrentSong,
+            currentPlayer,
+            setCurrentPlayer,
+            isPlaying,
+            setIsPlaying
          }}
       >
-         <View
-            style={{
-               flexDirection: 'row',
-               alignSelf: 'center',
-               justifyContent: 'space-between',
-
-               alignItems: 'center'
-            }}
-         >
-            <Button
-               onPress={handlePlayButton}
-               size='giant'
-               status='info'
-               style={{ borderRadius: 50, height: 75, width: 75 }}
-            >
-               {v => <Ionicons name='ios-play' size={36} color='white' />}
-            </Button>
-         </View>
-      </View>
+         <Layout style={{ flex: 1 }}>
+            <Toolbar title='Player Songs' />
+            <FlatList
+               data={PLAYERS}
+               keyExtractor={item => item.name + item.dob}
+               renderItem={({ item: p }) => (
+                  <PlayerCard key={`${p.name}-${p.dob}`} player={p} />
+               )}
+               nestedScrollEnabled
+            />
+            <SongPlayer />
+         </Layout>
+      </SongContext.Provider>
    );
 };

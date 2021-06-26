@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Image } from 'react-native';
-import { Text } from '@ui-kitten/components';
-import { IPlayer } from '../song-data';
+import { View } from 'react-native';
+import { Divider, Text } from '@ui-kitten/components';
+import { IPlayer } from '../../../data/player-data';
+import { useScreenSize } from '../../../utils/hooks';
+import { PlayerImage } from './player-image';
 import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
 
 interface PlayerDetailProps {
@@ -13,27 +15,19 @@ export const PlayerDetail: React.FC<PlayerDetailProps> = ({
 }) => {
    const theme = useKittenTheme();
    return (
-      <View style={{ flexDirection: 'row', padding: 12 }}>
-         <View
-            style={{
-               borderRadius: 50,
-               width: 75,
-               height: 75,
-               borderWidth: 3,
-               borderColor: theme['color-info-500'],
-               padding: 0
-            }}
-         >
-            <Image
-               source={player.image}
-               style={{ height: '100%', width: '100%', borderRadius: 50 }}
-            />
-         </View>
+      <View style={{ flexDirection: 'row' }}>
+         <PlayerImage
+            image={player.image}
+            borderColor={theme['color-info-500']}
+         />
          <View>
-            <Text>{player.name}</Text>
-            <Text>{player.dob}</Text>
+            <Text category={'label'} style={{ fontSize: 14 }}>
+               {player.name}
+            </Text>
             <Text style={{ fontStyle: 'italic' }}>"{player.catchPhrase}"</Text>
-            <Text>{player.dob}</Text>
+            <Text>Birthday: {player.dob}</Text>
+            <Text>Superhero: {player.superhero}</Text>
+            {/* <Text>Role Model: {player.baseballIcon}</Text> */}
          </View>
       </View>
    );

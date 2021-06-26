@@ -1,65 +1,54 @@
-import React from 'react';
-import { View } from 'react-native';
-import { Text, Button, ButtonProps } from '@ui-kitten/components';
-import { Song } from '../song-data';
-import { IconTyped } from '../../../components/ui-kitten-wrappers/IconWrapper';
+import { Ionicons } from '@expo/vector-icons';
+import { Button, ButtonProps } from '@ui-kitten/components';
+import React, { useMemo } from 'react';
+import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
+import { Song } from '../../../data/player-data';
+import { useScreenSize } from '../../../utils/hooks';
+import { SongContext } from '../player-songs.screen';
+import { statusFromEvent } from '../utils/status-from-event';
+import { EventIcon } from './event-icon';
 
 interface SongButtonProps extends ButtonProps {
-   song: Song<any>;
+   song: Song;
 }
 export const SongButton: React.FC<SongButtonProps> = ({
    children,
    song,
    ...props
 }) => {
+   const theme = useKittenTheme();
+   const status = statusFromEvent(song?.event);
+   const buttonColor = theme[`color-${status}-100`];
+   const { isPlaying, currentSong } = React.useContext(SongContext);
+   const amIPlaying = useMemo(
+      () => currentSong?.label === song.label && isPlaying,
+      [isPlaying, currentSong?.label]
+   );
+
+   const size = useScreenSize();
+   const iconSize = size.isSmall ? 'medium' : 'giant';
+   const iconDimension = size.isSmall ? 30 : 40;
    return (
       <Button
-         status={song.event === 'at-bat' ? 'info' : 'primary'}
-         style={{ width: '45%' }}
          {...props}
-      >
-         {eva => (
-            <View
-               style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-evenly',
-                  width: '100%',
-                  alignItems: 'center'
-               }}
-            >
-               <IconTyped
-                  name={song.event === 'at-bat' ? 'award' : 'star'}
-                  status='control'
-                  style={{ height: 36, width: 36 }}
-               />
-               <View>
-                  <Text status='control' category='h6'>
-                     {song.event === 'at-bat' ? 'At-Bat' : 'Celebrate!'}
-                  </Text>
-                  <View
-                     style={{
-                        flexDirection: 'row',
-                        alignItems: 'center'
-                     }}
-                  >
-                     <IconTyped
-                        name='music'
-                        status='control'
-                        style={{ height: 14, width: 14, marginRight: 3 }}
-                     />
-                     <Text
-                        {...eva}
-                        adjustsFontSizeToFit={true}
-                        category={'c1'}
-                        status={'control'}
-                        style={{ fontSize: 10 }}
-                     >
-                        {song.label}
-                     </Text>
-                  </View>
-               </View>
-            </View>
+         status={status}
+         style={[props.style, { width: 100 }]}
+         size={iconSize}
+         // accessoryRight={() => (
+         //    <Ionicons
+         //       name={amIPlaying ? 'ios-pause' : 'ios-play'}
+         //       size={40}
+         //       color={buttonColor}
+         //    />
+         // )}
+         disabled={song.songFile == null}
+         accessoryLeft={() => (
+            <EventIcon
+               event={song.event}
+               size={iconDimension}
+               colorWeight={100}
+            />
          )}
-      </Button>
+      />
    );
 };

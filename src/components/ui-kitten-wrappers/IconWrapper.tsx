@@ -21,7 +21,7 @@ interface IconWrapperProps extends IconProps {
    status?: Statuses;
 }
 
-const statusToColor = (status: Statuses = 'basic') =>
+export const UIKittenStatusToColor = (status: Statuses = 'basic') =>
    status === 'control' ? 'color-control-default' : `color-${status}-500`;
 
 export const IconTyped: React.FC<IconWrapperProps> = props => {
@@ -32,7 +32,7 @@ export const IconTyped: React.FC<IconWrapperProps> = props => {
          name={FinagleIconName(props.name)}
          fill={
             !!props?.status
-               ? theme[statusToColor(props.status)]
+               ? theme[UIKittenStatusToColor(props.status)]
                : theme[props?.fill]
          }
       />
