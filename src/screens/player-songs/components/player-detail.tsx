@@ -16,17 +16,21 @@ export const PlayerDetail: React.FC<PlayerDetailProps> = ({
    const theme = useKittenTheme();
    return (
       <View style={{ flexDirection: 'row' }}>
-         <PlayerImage
+         {/* <PlayerImage
             image={player.image}
-            borderColor={theme['color-info-500']}
-         />
+            borderColor={theme['color-basic-700']}
+         /> */}
          <View>
             <Text category={'label'} style={{ fontSize: 14 }}>
                {player.name}
             </Text>
-            <Text style={{ fontStyle: 'italic' }}>"{player.catchPhrase}"</Text>
-            <Text>Birthday: {player.dob}</Text>
-            <Text>Superhero: {player.superhero}</Text>
+            {!!player.catchPhrase && (
+               <Text style={{ fontStyle: 'italic' }}>
+                  "{player.catchPhrase}"
+               </Text>
+            )}
+            {!!player.dob && <Text>Birthday: {player.dob}</Text>}
+            {!!player.superhero && <Text>Superhero: {player.superhero}</Text>}
             {/* <Text>Role Model: {player.baseballIcon}</Text> */}
          </View>
       </View>

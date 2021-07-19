@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, ViewProps } from 'react-native';
-import { IPlayer } from '../../../data/player-data';
+import { ImageHostUrl, IPlayer } from '../../../data/player-data';
 import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
 
 interface PlayerImageProps extends ViewProps {
@@ -19,20 +19,18 @@ export const PlayerImage: React.FC<PlayerImageProps> = ({
       <View
          style={[
             {
-               borderRadius: size / 2,
+               //borderRadius: size / 2,
                width: size,
-               height: size,
-               borderWidth: 3,
-               borderColor: borderColor,
-               padding: 0,
-               marginRight: 12
+               height: size
+               //borderWidth: 3,
+               //borderColor: borderColor,
             },
             props.style
          ]}
       >
          <Image
-            source={image}
-            style={{ height: '100%', width: '100%', borderRadius: 50 }}
+            source={{ uri: ImageHostUrl(image || 'griff.jpg') }}
+            style={{ height: '100%', width: '100%' }}
          />
       </View>
    );

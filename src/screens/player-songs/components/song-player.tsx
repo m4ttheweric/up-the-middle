@@ -1,40 +1,30 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
-import { Button, Icon, Text } from '@ui-kitten/components';
+import { Button, Icon } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
-import { AVPlaybackStatusToSet } from 'expo-av/build/AV';
+import { AVPlaybackStatus, AVPlaybackStatusToSet } from 'expo-av/build/AV';
 import { useFonts } from 'expo-font';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import TextTicker from 'react-native-text-ticker';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { View } from 'react-native';
 import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
+import { SongHostUrl } from '../../../data/player-data';
 import { SongContext } from '../player-songs.screen';
 import { statusFromEvent } from '../utils/status-from-event';
-import { useCurrentPlayer } from '../utils/useCurrentPlayer';
-import { EventIcon } from './event-icon';
-import { PlayerImage } from './player-image';
+import { CurrentSongDetail } from './CurrentSongDetail';
 
 const LOOPING_TYPE_ALL = 0;
 const LOOPING_TYPE_ONE = 1;
-
-const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get('window');
-const BACKGROUND_COLOR = '#FFF8ED';
-const DISABLED_OPACITY = 0.5;
-const FONT_SIZE = 14;
 const LOADING_STRING = '... loading ...';
 const BUFFERING_STRING = '...buffering...';
-const RATE_SCALE = 3.0;
-const VIDEO_CONTAINER_HEIGHT = (DEVICE_HEIGHT * 2.0) / 5.0 - FONT_SIZE * 2;
+
 export const SongPlayer: React.FC<{}> = () => {
    const theme = useKittenTheme();
-   const [sound, setSound] = React.useState<Audio.Sound>(null);
+
    const { currentSong, setIsPlaying, isPlaying } = useContext(SongContext);
-   const currentPlayer = useCurrentPlayer();
+
    const status = statusFromEvent(currentSong?.event);
 
    const buttonColor = theme[`color-${status}-100`];
 
-   const index = useRef(0);
    const isSeeking = useRef(false);
    const shouldPlayAtEndOfSeek = useRef(false);
    const playbackInstance = useRef<Audio.Sound>(null);
@@ -72,6 +62,7 @@ export const SongPlayer: React.FC<{}> = () => {
    };
 
    useEffect(() => {
+      console.log('did mount');
       Audio.setAudioModeAsync({
          allowsRecordingIOS: false,
          staysActiveInBackground: false,
@@ -81,30 +72,35 @@ export const SongPlayer: React.FC<{}> = () => {
          interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX
       });
       return () => {
+         console.log('did mount cleanup');
          unloadPlayback();
       };
    }, []);
 
    useEffect(() => {
       console.log('song changed');
-      async function onSongChange() {
-         if (currentSong != null) {
-            if (playbackInstance.current != null) {
-               const status = await playbackInstance.current.getStatusAsync();
-               if (status.isLoaded && status.isPlaying) {
-                  await playbackInstance.current.stopAsync();
-                  setState(s => ({
-                     ...s,
-                     isPlaying: false,
-                     playbackInstancePosition: 0
-                  }));
+      if (currentSong) {
+         _loadNewPlaybackInstance(true);
+      }
+      return () => {
+         async function cleanup() {
+            if (currentSong != null) {
+               if (playbackInstance.current != null) {
+                  const status =
+                     await playbackInstance.current.getStatusAsync();
+                  if (status.isLoaded && status.isPlaying) {
+                     await playbackInstance.current.stopAsync();
+                     setState(s => ({
+                        ...s,
+                        isPlaying: false,
+                        playbackInstancePosition: 0
+                     }));
+                  }
                }
             }
-
-            _loadNewPlaybackInstance(true);
          }
-      }
-      onSongChange();
+         cleanup();
+      };
    }, [currentSong]);
 
    async function _loadNewPlaybackInstance(playing) {
@@ -113,9 +109,9 @@ export const SongPlayer: React.FC<{}> = () => {
          // playbackInstance.current.setOnPlaybackStatusUpdate(null);
          playbackInstance.current = null;
       }
-
+      console.log('unloaded');
       const initialStatus: AVPlaybackStatusToSet = {
-         shouldPlay: false, //currentSong.startAt > 0 ? false : true,
+         shouldPlay: true, //currentSong.startAt > 0 ? false : true,
          volume: state.volume,
          isMuted: state.muted,
          isLooping: state.loopingType === LOOPING_TYPE_ONE,
@@ -123,15 +119,14 @@ export const SongPlayer: React.FC<{}> = () => {
       };
 
       const { sound, status } = await Audio.Sound.createAsync(
-         currentSong.songFile,
+         { uri: SongHostUrl(currentSong.songFile) },
          initialStatus,
          _onPlaybackStatusUpdate
       );
-
       playbackInstance.current = sound;
    }
 
-   const _onPlaybackStatusUpdate = status => {
+   const _onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
       if (status.isLoaded) {
          setState(s => ({
             ...s,
@@ -140,13 +135,14 @@ export const SongPlayer: React.FC<{}> = () => {
             shouldPlay: status.shouldPlay,
             isPlaying: status.isPlaying,
             isBuffering: status.isBuffering,
+            isLoading: !status.isLoaded,
             muted: status.isMuted,
             volume: status.volume,
             loopingType: status.isLooping ? LOOPING_TYPE_ONE : LOOPING_TYPE_ALL
          }));
       } else {
-         if (status.error) {
-            console.log(`FATAL PLAYER ERROR: ${status.error}`);
+         if (status?.['error']) {
+            console.log(`FATAL PLAYER ERROR: ${status?.['error']}`);
          }
       }
    };
@@ -344,105 +340,81 @@ export const SongPlayer: React.FC<{}> = () => {
       }
    }
 
-   const fadeIcon = useFadingIcon(fading);
+   const pulseIconRef = useRef<Icon<any>>(null);
 
+   useEffect(() => {
+      if (fading === true) {
+         console.log('starting animation');
+         pulseIconRef.current?.startAnimation();
+      } else {
+         pulseIconRef.current?.stopAnimation();
+      }
+   }, [fading]);
+   const renderPulseIcon = useMemo(
+      () => props =>
+         (
+            <Icon
+               {...props}
+               height={30}
+               width={30}
+               ref={pulseIconRef}
+               animationConfig={{ cycles: 100 }}
+               animation='pulse'
+               name='trending-down-outline'
+            />
+         ),
+      []
+   );
    return (
       <View
          style={{
             width: '100%',
-            backgroundColor: theme['color-basic-700'],
-            padding: 20
+            backgroundColor: theme[`color-basic-1000`]
          }}
       >
-         {currentSong != null && (
-            <View
-               style={[
-                  styles.playbackContainer,
-                  {
-                     opacity: state.isLoading ? DISABLED_OPACITY : 1.0
-                  }
-               ]}
-            >
-               <View style={styles.timestampRow}>
-                  {/* <Text
-                     status={'control'}
-                     style={[
-                        styles.text,
-                        styles.buffering,
-                        { fontFamily: 'cutive-mono-regular' }
-                     ]}
-                  >
-                     {state.isBuffering ? BUFFERING_STRING : ''}
-                  </Text> */}
-                  <Text
-                     status={'control'}
-                     style={[
-                        styles.text,
-                        styles.timestamp,
-                        { fontFamily: 'cutive-mono-regular' }
-                     ]}
-                  >
-                     {_getTimestamp()}
-                  </Text>
-               </View>
-               <View
-                  style={{
-                     flexDirection: 'row',
-                     justifyContent: 'space-between',
-                     alignSelf: 'stretch',
-                     alignItems: 'center'
-                  }}
-               >
-                  <Slider
-                     style={{ flex: 1 }}
-                     //trackImage={ICON_TRACK_1.module}
-                     //thumbImage={ICON_THUMB_1.module}
-                     minimumTrackTintColor={theme[`color-${status}-500`]}
-                     maximumTrackTintColor={theme[`color-${status}-100`]}
-                     value={_getSeekSliderPosition()}
-                     onValueChange={_onSeekSliderValueChange}
-                     onSlidingComplete={_onSeekSliderSlidingComplete}
-                     disabled={state.isLoading}
-                  />
-                  {currentSong != null && (
-                     <Button
-                        onPress={fadeOut}
-                        appearance={fading ? 'filled' : 'outline'}
-                        status={'danger'}
-                        size={'tiny'}
-                        style={{
-                           marginLeft: 12,
-                           borderRadius: 100,
-                           marginRight: 6
-                        }}
-                        //disabled={!state.isPlaying}
-                        accessoryRight={fadeIcon}
-                     />
-                  )}
-               </View>
-            </View>
+         {currentSong && state.isPlaying && (
+            <ProgressLine position={_getSeekSliderPosition()} />
          )}
          <View
             style={{
                flexDirection: 'row',
-
                justifyContent: 'space-between',
-
-               alignItems: 'center'
+               alignItems: 'center',
+               paddingVertical: 12,
+               paddingHorizontal: 6
             }}
          >
+            <Button
+               onPress={() => {
+                  fadeOut();
+                  //pulseIconRef.current.startAnimation();
+               }}
+               //appearance={fading ? 'filled' : 'outline'}
+               appearance={'ghost'}
+               status={fading ? 'danger' : 'control'}
+               size={'tiny'}
+               style={{ opacity: currentSong ? 1 : 0, marginRight: 4 }}
+               disabled={!currentSong}
+               accessoryRight={renderPulseIcon}
+            />
+
             <CurrentSongDetail />
 
             <Button
                onPress={_onPlayPausePressed}
                size='tiny'
-               status={status}
-               style={{ borderRadius: 50, marginLeft: 12 }}
+               appearance='ghost'
+               status={'control'}
+               style={{
+                  borderRadius: 50,
+                  marginLeft: 12,
+                  opacity: currentSong ? 1 : 0
+               }}
                disabled={!currentSong || fading}
                accessoryRight={() => (
                   <Ionicons
                      name={isPlaying ? 'ios-pause' : 'ios-play'}
-                     size={currentSong ? 50 : 12}
+                     size={50}
                      color={buttonColor}
                   />
                )}
@@ -452,197 +424,30 @@ export const SongPlayer: React.FC<{}> = () => {
    );
 };
 
-export function useFadingIcon(
-   fading: boolean,
-   width: number = 30,
-   height: number = 30
-) {
-   const iconRef = useRef(null);
-
-   useEffect(() => {
-      if (fading === true) {
-         iconRef.current?.startAnimation();
-      } else {
-         iconRef.current?.stopAnimation();
-      }
-   }, [fading]);
-
-   const icon = style => (
-      <Icon
-         {...style}
-         width={width}
-         height={height}
-         ref={iconRef}
-         name={'arrow-down-outline'}
-         animation='pulse'
-      />
-   );
-
-   return icon;
+interface ProgressLineProps {
+   position: number;
 }
-
-const styles = StyleSheet.create({
-   emptyContainer: {
-      alignSelf: 'stretch',
-      backgroundColor: BACKGROUND_COLOR
-   },
-   container: {
-      flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      alignSelf: 'stretch',
-      backgroundColor: BACKGROUND_COLOR
-   },
-   wrapper: {},
-   nameContainer: {
-      height: FONT_SIZE
-   },
-   space: {
-      height: FONT_SIZE
-   },
-   videoContainer: {
-      height: VIDEO_CONTAINER_HEIGHT
-   },
-   video: {
-      maxWidth: DEVICE_WIDTH
-   },
-   playbackContainer: {
-      //flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      alignSelf: 'stretch',
-      marginBottom: 28
-   },
-   playbackSlider: {
-      alignSelf: 'stretch'
-   },
-   timestampRow: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      alignSelf: 'stretch',
-      minHeight: FONT_SIZE
-   },
-   text: {
-      fontSize: FONT_SIZE,
-      minHeight: FONT_SIZE
-   },
-   buffering: {
-      textAlign: 'left',
-      paddingLeft: 20
-   },
-   timestamp: {
-      textAlign: 'right',
-      paddingRight: 20
-   },
-   button: {
-      backgroundColor: BACKGROUND_COLOR
-   },
-   buttonsContainerBase: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between'
-   },
-
-   volumeContainer: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      minWidth: DEVICE_WIDTH / 2.0,
-      maxWidth: DEVICE_WIDTH / 2.0
-   },
-   rateSlider: {
-      width: DEVICE_WIDTH / 2.0
-   },
-   buttonsContainerTextRow: {
-      maxHeight: FONT_SIZE,
-      alignItems: 'center',
-      paddingRight: 20,
-      paddingLeft: 20,
-      minWidth: DEVICE_WIDTH,
-      maxWidth: DEVICE_WIDTH
-   }
-});
-
-const CurrentSongDetail: React.FC = ({ children }) => {
-   const { currentSong } = useContext(SongContext);
-   const currentPlayer = useCurrentPlayer();
+const ProgressLine: React.FC<ProgressLineProps> = ({ children, position }) => {
    const theme = useKittenTheme();
-   const status = statusFromEvent(currentSong?.event);
    return (
-      <View style={{ flexDirection: 'row', flex: 1 }}>
-         {currentSong != null && currentPlayer && (
-            <>
-               <PlayerImage
-                  image={currentPlayer.image}
-                  borderColor={theme[`color-${status}-500`]}
-               />
-
-               <View style={{ flex: 1 }}>
-                  <SongTitleTicker title={currentSong.label} />
-                  <Text status='control' style={{ marginTop: 4 }}>
-                     {currentPlayer.name}
-                  </Text>
-                  <View style={{ flexDirection: 'row', marginTop: 4 }}>
-                     <EventIcon
-                        event={currentSong.event}
-                        size={12}
-                        colorWeight={100}
-                     />
-                     <Text
-                        status='control'
-                        style={{ marginLeft: 4 }}
-                        category={'c1'}
-                     >
-                        {currentSong.event === 'at-bat'
-                           ? 'At Bat Song'
-                           : 'Celebration Song'}
-                     </Text>
-                  </View>
-               </View>
-            </>
-         )}
-
-         {!currentSong && (
-            <Text status={'control'} style={{ opacity: 0.5 }}>
-               No song selected
-            </Text>
-         )}
-      </View>
-   );
-};
-interface SongTitleTickerProps {
-   title: string;
-}
-const SongTitleTicker: React.FC<SongTitleTickerProps> = ({
-   children,
-   title
-}) => {
-   return (
-      <View style={{ flexDirection: 'row' }}>
-         <Ionicons
-            name='ios-musical-notes'
-            size={18}
-            color='white'
-            style={{ marginRight: 4 }}
-         />
-         <View style={{ flex: 1 }}>
-            <TextTicker
-               style={{ color: 'white', fontWeight: 'bold' }}
-               duration={8000}
-               loop
-               bounce
-               repeatSpacer={50}
-               marqueeDelay={1000}
-            >
-               {title}
-            </TextTicker>
-         </View>
+      <View style={{ width: '100%', position: 'relative' }}>
+         <View
+            style={{
+               width: '100%',
+               height: 3,
+               zIndex: 1,
+               backgroundColor: 'white'
+            }}
+         ></View>
+         <View
+            style={{
+               width: `${position * 100}%`,
+               height: 3,
+               backgroundColor: theme['color-info-500'],
+               position: 'absolute',
+               zIndex: 2
+            }}
+         ></View>
       </View>
    );
 };

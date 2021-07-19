@@ -1,8 +1,9 @@
-import { ButtonGroup, Layout } from '@ui-kitten/components';
+import { ButtonGroup, Layout, Text } from '@ui-kitten/components';
+import moment from 'moment';
 import React, { useContext } from 'react';
-import { View } from 'react-native';
+import { TouchableOpacity, View, Image } from 'react-native';
 import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
-import { IPlayer, Song } from '../../../data/player-data';
+import { ImageHostUrl, IPlayer, Song } from '../../../data/player-data';
 import { useScreenSize } from '../../../utils/hooks';
 import { SongContext } from '../player-songs.screen';
 import { statusFromEvent } from '../utils/status-from-event';
@@ -17,7 +18,7 @@ interface PlayerCardProps {
 export const PlayerCard: React.FC<PlayerCardProps> = ({ children, player }) => {
    const screenSize = useScreenSize();
 
-   const { setCurrentSong, currentSong, setCurrentPlayer } =
+   const { setCurrentSong, currentSong, setCurrentPlayer, currentPlayer } =
       useContext(SongContext);
    const status = statusFromEvent(currentSong?.event);
    function handleSongPress(song: Song) {
@@ -26,54 +27,62 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ children, player }) => {
          setCurrentPlayer(player);
       }
    }
-   const currentPlayer = useCurrentPlayer();
+
    const theme = useKittenTheme();
    const isCurrentPlayer = currentPlayer?.name === player.name;
-   const backgroundColor = isCurrentPlayer
-      ? theme[`color-${status}-100`]
-      : theme['background-basic-color-4'];
+   const backgroundColor = isCurrentPlayer ? theme['color-basic-500'] : null;
    return (
-      <Layout
-         style={[
-            {
-               flexDirection: screenSize.isSmall ? 'column' : 'row',
-               justifyContent: 'space-between',
-               marginHorizontal: 12,
-               marginVertical: 8,
-               borderRadius: 8,
-               padding: 12,
-               backgroundColor: backgroundColor,
-               borderColor: isCurrentPlayer
-                  ? theme[`color-${status}-500`]
-                  : theme['background-basic-color-4'],
-               borderWidth: 2
-            }
-         ]}
+      <TouchableOpacity
+         activeOpacity={0.5}
+         onPress={() => {
+            console.log('setPlayer:', player.name, setCurrentPlayer);
+            setCurrentPlayer(player);
+         }}
       >
-         <PlayerDetail player={player} />
-         <View
-            style={{
-               flexDirection: 'row',
-               justifyContent: screenSize.isSmall
-                  ? 'space-between'
-                  : 'flex-end',
-               marginTop: screenSize.isSmall ? 12 : 0
-            }}
+         <Layout
+            style={[
+               {
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  flexWrap: 'nowrap',
+                  justifyContent: 'space-between',
+                  backgroundColor: backgroundColor,
+                  borderColor: theme['color-basic-400'],
+                  borderBottomWidth: 1,
+                  width: '100%'
+               }
+            ]}
          >
-            <SongButton
-               onPress={() => handleSongPress(player.atBatSong)}
-               song={player.atBatSong}
-               style={{ width: screenSize.isSmall ? '50%' : 'auto' }}
-            />
-            <SongButton
-               onPress={() => handleSongPress(player.celebrationSong)}
-               song={player.celebrationSong}
+            <Text style={{ flex: 1, textAlign: 'center' }}>
+               {player.jerseyNumber}
+            </Text>
+            <View
                style={{
-                  width: screenSize.isSmall ? '50%' : 'auto',
-                  marginLeft: screenSize.isSmall ? 0 : 12
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  maxHeight: screenSize.isSmall ? 60 : 100,
+                  marginHorizontal: 8
                }}
-            />
-         </View>
-      </Layout>
+            >
+               <Image
+                  resizeMethod='auto'
+                  source={{ uri: ImageHostUrl(player.image || 'griff.jpg') }}
+                  style={{ height: '100%', width: '100%', maxWidth: 100 }}
+               />
+            </View>
+
+            <View style={{ flex: 3 }}>
+               <Text>{player.name}</Text>
+               <Text>{player.position}</Text>
+            </View>
+            <Text style={{ flex: 1, textAlign: 'center' }}>
+               {player.batsThrows}
+            </Text>
+            <Text style={{ flex: 1, textAlign: 'center' }}>
+               {moment().diff(moment(player.dob, 'MM-DD-YYYY'), 'years')}
+            </Text>
+         </Layout>
+      </TouchableOpacity>
    );
 };

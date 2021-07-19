@@ -9,16 +9,19 @@ interface EventIconProps {
    event: Song['event'];
    size: number;
    colorWeight: number;
+   statusOverride?: string;
 }
 export const EventIcon: React.FC<EventIconProps> = ({
    children,
    event,
    size,
-   colorWeight
+   colorWeight,
+   statusOverride
 }) => {
    const theme = useKittenTheme();
    const status = statusFromEvent(event);
-   const buttonColor = theme[`color-${status}-${colorWeight}`];
+   const buttonColor =
+      theme[`color-${statusOverride || status}-${colorWeight}`];
    return (
       <>
          {event === 'at-bat' ? (
