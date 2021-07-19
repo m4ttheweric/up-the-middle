@@ -148,7 +148,7 @@ export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
                nestedScrollEnabled
             />
             <SongPlayer />
-            {currentPlayer && <PlayerLink />}
+            {/* {currentPlayer && <PlayerLink />} */}
             {currentPlayer && <SongList />}
          </Layout>
       </SongContext.Provider>
