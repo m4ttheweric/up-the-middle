@@ -15,7 +15,7 @@ import { useAppStorageInit } from './src/app-storage/utils';
 import UIProvider from './src/components/ui-provider';
 import { HomeNavigator } from './src/screens/home/home.navigator';
 import { DimensionsProvider } from './src/components/dimensions-provider';
-import { IPlayer } from './src/data/player-data';
+import { IPlayer, Song } from './src/data/player-data';
 
 enableScreens();
 export const PlayersContext = React.createContext<{ players: IPlayer[] }>(null);
@@ -23,21 +23,21 @@ export default function App() {
    const { isReady, initOnLaunch } = useAppStorageInit();
    const [doneLoadingAssets, setDoneLoadingAssets] = useState<boolean>(false);
    const [players, setPlayers] = useState<IPlayer[]>(null);
-   const ctxPlayers = useMemo(() => players, [players]);
+
    useEffect(() => {
       initOnLaunch();
-      fetch('https://up-the-middle.web.app/players.json?uid=12345')
+      fetch('https://up-the-middle.web.app/players.json?uid=5')
          .then(response => response.json())
          .then(data => {
             console.log(data);
-            setPlayers([...data]);
+            setPlayers([...preProcessPlayers(data)]);
          })
          .finally(() => {
             setDoneLoadingAssets(true);
          });
    }, []);
 
-   if (!doneLoadingAssets) {
+   if (!doneLoadingAssets && !isReady) {
       return <AppLoading />;
    }
 
@@ -96,3 +96,80 @@ if (Platform.OS !== 'web') {
       `Accessing the 'state' property of the 'route' object is not supported.`
    ]);
 }
+
+function preProcessPlayers(PLAYERS: IPlayer[]) {
+   console.log('players ==', PLAYERS);
+   if (PLAYERS == null) return [];
+   return PLAYERS.map(p => {
+      p.songs = [];
+
+      if (p.atBatSong.songFile) {
+         p.songs = [...p.songs, p.atBatSong];
+      } else {
+         p.songs = [...p.songs, DEFAULT_AT_BAT_SONG];
+      }
+
+      if (p.celebrationSong.songFile) {
+         p.songs = [...p.songs, p.celebrationSong];
+      }
+      p.songs = [
+         ...p.songs,
+         DEFAULT_CELEBRATION_SONG,
+         ALTERNATE_CELEBRATION_SONG
+      ];
+
+      p.lastName = p.name.split(' ')[1];
+      p.firstName = p.name.split(' ')[0];
+      p.image = `${p.firstName.toLowerCase()}.jpg`;
+      console.log(p.image);
+      return p;
+   }).sort((a, b) => a.lastName.localeCompare(b.lastName));
+}
+
+const DEFAULT_AT_BAT_SONG: Song = {
+   event: 'at-bat',
+   songFile: 'the_middle.mp3',
+   label: 'Zedd, Grey - The Middle (Lyrics) ft. Maren Morris',
+   startAt: 46000
+};
+
+const DEFAULT_CELEBRATION_SONG: Song = {
+   event: 'celebration',
+   songFile: 'celebrate.mp3',
+   label: 'Kool & The Gang - Celebration',
+   startAt: 33000
+};
+
+const ALTERNATE_CELEBRATION_SONG: Song = {
+   event: 'celebration',
+   songFile: 'song2.mp3',
+   label: 'Blur - Song 2',
+   startAt: 13000
+};
+
+const IRIS: Song = {
+   event: 'at-bat',
+   songFile: 'iris.mp3',
+   label: 'Goo Goo Dolls - Iris',
+   startAt: 49000
+};
+
+const BARBIE_GIRL: Song = {
+   event: 'at-bat',
+   songFile: 'barbie.mp3',
+   label: 'Aqua - Barbie Girl',
+   startAt: 49000
+};
+
+const COTTON_EYED_JOE: Song = {
+   event: 'at-bat',
+   songFile: 'cottonjoe.mp3',
+   label: 'Rednex - Cotton Eyed Joe',
+   startAt: 0
+};
+const FRIDAY: Song = {
+   event: 'at-bat',
+   songFile: 'friday.mp3',
+   label: 'Rebecca Black - Friday',
+   startAt: 44
+};

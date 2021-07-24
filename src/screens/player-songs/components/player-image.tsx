@@ -1,15 +1,14 @@
+import { Spinner } from '@ui-kitten/components';
 import React, { useMemo, useState } from 'react';
 import {
-   View,
    Image,
-   ViewProps,
-   StyleSheet,
+   ImageSourcePropType,
    Platform,
-   ImageSourcePropType
+   StyleSheet,
+   View,
+   ViewProps
 } from 'react-native';
-import { ImageHostUrl, IPlayer } from '../../../data/player-data';
-import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
-import { Spinner } from '@ui-kitten/components';
+import { IPlayer } from '../../../data/player-data';
 import { useScreenSize } from '../../../utils/hooks';
 
 interface PlayerImageProps extends ViewProps {
@@ -20,7 +19,6 @@ export const PlayerImage: React.FC<PlayerImageProps> = ({
    ...props
 }) => {
    const [loading, setLoading] = useState<boolean>(true);
-   const screenSize = useScreenSize();
 
    const imageSrc = (): ImageSourcePropType => {
       if (Platform.OS === 'web') {
@@ -39,22 +37,8 @@ export const PlayerImage: React.FC<PlayerImageProps> = ({
    const ImageSource = useMemo(() => imageSrc(), []);
    const styles = useStyles();
    return (
-      <View
-         style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            maxHeight:
-               Platform.OS === 'web' ? 400 : screenSize.isSmall ? 75 : 100,
-            minHeight: 100,
-            marginHorizontal: 8,
-            overflow: 'hidden'
-         }}
-      >
+      <View style={styles.container}>
          <Image
-            // onLoadStart={() => {
-            //    setLoading(true);
-            // }}
             onLoadEnd={() => {
                setLoading(false);
             }}
@@ -63,22 +47,7 @@ export const PlayerImage: React.FC<PlayerImageProps> = ({
             style={Platform.OS === 'web' ? styles.webStyle : styles.deviceStyle}
          />
          {loading && (
-            <View
-               style={{
-                  position: 'absolute',
-                  zIndex: 2,
-                  height: 100,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 100,
-                  opacity: 0.75
-               }}
-            >
+            <View style={styles.spinnerContainer}>
                <Spinner status={'info'} />
             </View>
          )}
@@ -87,7 +56,18 @@ export const PlayerImage: React.FC<PlayerImageProps> = ({
 };
 
 const useStyles = () => {
+   const screenSize = useScreenSize();
    return StyleSheet.create({
+      container: {
+         flex: 1,
+         justifyContent: 'center',
+         alignItems: 'center',
+         maxHeight: Platform.OS === 'web' ? 400 : screenSize.isSmall ? 75 : 100,
+         maxWidth: 85,
+         minHeight: 100,
+         marginHorizontal: 8,
+         overflow: 'hidden'
+      },
       webStyle: {
          zIndex: 1,
          maxWidth: 100
@@ -98,6 +78,20 @@ const useStyles = () => {
          maxWidth: 100,
          zIndex: 1
          //position: 'relative'
+      },
+      spinnerContainer: {
+         position: 'absolute',
+         zIndex: 2,
+         height: 100,
+         justifyContent: 'center',
+         alignItems: 'center',
+
+         left: 0,
+         right: 0,
+         top: 0,
+         bottom: 0,
+         width: 100,
+         opacity: 0.75
       }
    });
 };

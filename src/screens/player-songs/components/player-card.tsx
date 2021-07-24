@@ -76,6 +76,14 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ children, player }) => {
 
             <View style={{ flex: 3 }}>
                <Text>{player.name}</Text>
+               <Text
+                  style={{ fontStyle: 'italic' }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  category={'c1'}
+               >
+                  "{player.catchPhrase}"
+               </Text>
                <Text>{player.position}</Text>
             </View>
             <Text style={{ flex: 1, textAlign: 'center' }}>

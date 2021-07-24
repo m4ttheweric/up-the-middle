@@ -1,39 +1,50 @@
 {
-   "expo": {
-      "name": "up-the-middle",
-      "slug": "up-the-middle",
-      "privacy": "public",
-      "platforms": ["ios", "android", "web"],
-      "version": "1.0.0",
-      "orientation": "portrait",
-      "icon": "./assets/icon.png",
-      "splash": {
-         "image": "./assets/splash.png",
-         "resizeMode": "contain",
-         "backgroundColor": "#ffffff"
+  "expo": {
+    "name": "up-the-middle",
+    "slug": "up-the-middle",
+    "privacy": "public",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
       },
-      "updates": {
-         "fallbackToCacheTimeout": 0
-      },
-      "assetBundlePatterns": ["**/*"],
-      "ios": {
-         "supportsTablet": true,
-         "infoPlist": {
-            "UIBackgroundModes": ["audio"]
-         }
-      },
-      "android": {
-         "adaptiveIcon": {
-            "foregroundImage": "./assets/adaptive-icon.png",
-            "backgroundColor": "#FFFFFF"
-         }
-      },
-      "web": {
-         "build": {
-            "babel": {
-               "include": ["static-container"]
-            }
-         }
+      "bundleIdentifier": "com.m4ttheweric.up-the-middle"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
       }
-   }
+    },
+    "web": {
+      "build": {
+        "babel": {
+          "include": [
+            "static-container"
+          ]
+        }
+      }
+    }
+  }
 }

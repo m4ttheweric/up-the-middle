@@ -37,6 +37,6 @@ export interface IPlayer {
 }
 
 export const SongHostUrl = (file: string) =>
-   `https://up-the-middle.web.app/songs/${file}`;
+   `https://up-the-middle.web.app/songs/${file}?u=1`;
 export const ImageHostUrl = (file: string) =>
    `https://up-the-middle.web.app/images/${file}?u=3`;

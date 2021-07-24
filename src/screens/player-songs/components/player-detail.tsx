@@ -16,10 +16,7 @@ export const PlayerDetail: React.FC<PlayerDetailProps> = ({
    const theme = useKittenTheme();
    return (
       <View style={{ flexDirection: 'row' }}>
-         {/* <PlayerImage
-            image={player.image}
-            borderColor={theme['color-basic-700']}
-         /> */}
+         {/* <PlayerImage image={player.image} /> */}
          <View>
             <Text category={'label'} style={{ fontSize: 14 }}>
                {player.name}
