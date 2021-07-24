@@ -55,7 +55,11 @@ export const SongPlayer: React.FC<{}> = () => {
             await playbackInstance.current.stopAsync();
          }
 
-         await playbackInstance.current.unloadAsync();
+         try {
+            await playbackInstance.current.unloadAsync();
+         } catch (e) {
+            console.log('HA caught you', e);
+         }
          // playbackInstance.current.setOnPlaybackStatusUpdate(null);
          playbackInstance.current = null;
       }
@@ -82,25 +86,25 @@ export const SongPlayer: React.FC<{}> = () => {
       if (currentSong) {
          _loadNewPlaybackInstance(true);
       }
-      return () => {
-         async function cleanup() {
-            if (currentSong != null) {
-               if (playbackInstance.current != null) {
-                  const status =
-                     await playbackInstance.current.getStatusAsync();
-                  if (status.isLoaded && status.isPlaying) {
-                     await playbackInstance.current.stopAsync();
-                     setState(s => ({
-                        ...s,
-                        isPlaying: false,
-                        playbackInstancePosition: 0
-                     }));
-                  }
-               }
-            }
-         }
-         cleanup();
-      };
+      // return () => {
+      //    // async function cleanup() {
+      //    //    if (currentSong != null) {
+      //    //       if (playbackInstance.current != null) {
+      //    //          const status =
+      //    //             await playbackInstance.current.getStatusAsync();
+      //    //          if (status.isLoaded && status.isPlaying) {
+      //    //             await playbackInstance.current.stopAsync();
+      //    //             setState(s => ({
+      //    //                ...s,
+      //    //                isPlaying: false,
+      //    //                playbackInstancePosition: 0
+      //    //             }));
+      //    //          }
+      //    //       }
+      //    //    }
+      //    // }
+      //    // cleanup();
+      // };
    }, [currentSong]);
 
    async function _loadNewPlaybackInstance(playing) {
@@ -272,7 +276,7 @@ export const SongPlayer: React.FC<{}> = () => {
                vol = vol - 0.01;
                SetVolume(vol);
 
-               if (vol > 0) {
+               if (vol > 0.1) {
                   setTimeout(async () => {
                      if (playbackInstance.current != null) {
                         const status =

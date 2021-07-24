@@ -9,6 +9,7 @@ import { SongContext } from '../player-songs.screen';
 import { statusFromEvent } from '../utils/status-from-event';
 import { useCurrentPlayer } from '../utils/useCurrentPlayer';
 import { PlayerDetail } from './player-detail';
+import { PlayerImage } from './player-image';
 import { SongButton } from './song-button';
 
 interface PlayerCardProps {
@@ -56,7 +57,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ children, player }) => {
             <Text style={{ flex: 1, textAlign: 'center' }}>
                {player.jerseyNumber}
             </Text>
-            <View
+            {/* <View
                style={{
                   flex: 1,
                   justifyContent: 'center',
@@ -70,7 +71,8 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ children, player }) => {
                   source={{ uri: ImageHostUrl(player.image || 'griff.jpg') }}
                   style={{ height: '100%', width: '100%', maxWidth: 100 }}
                />
-            </View>
+            </View> */}
+            <PlayerImage image={ImageHostUrl(player.image)} />
 
             <View style={{ flex: 3 }}>
                <Text>{player.name}</Text>

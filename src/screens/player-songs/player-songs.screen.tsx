@@ -1,14 +1,15 @@
 import { Divider, Layout, Text } from '@ui-kitten/components';
-import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, TextStyle } from 'react-native';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { FlatList, TextStyle, View } from 'react-native';
 import { Toolbar } from '../../components/toolbar.component';
 import { useKittenTheme } from '../../components/use-kitten-theme-wrapper';
-import { IPlayer, PLAYERS, Song } from '../../data/player-data';
+import { IPlayer, Song } from '../../data/player-data';
 import { PlayerCard } from './components/player-card';
 import { SongPlayer } from './components/song-player';
 import { SongList } from './components/SongList';
 import { PlayerLink } from './components/PlayerLinkProps';
 import { useCurrentPlayer } from './utils/useCurrentPlayer';
+import { PlayersContext } from '../../../App';
 
 interface PlayerSongsScreenProps {}
 
@@ -49,7 +50,36 @@ const ALTERNATE_CELEBRATION_SONG: Song = {
    startAt: 13000
 };
 
-function preProcessPlayers() {
+const IRIS: Song = {
+   event: 'at-bat',
+   songFile: 'iris.mp3',
+   label: 'Goo Goo Dolls - Iris',
+   startAt: 49000
+};
+
+const BARBIE_GIRL: Song = {
+   event: 'at-bat',
+   songFile: 'barbie.mp3',
+   label: 'Aqua - Barbie Girl',
+   startAt: 49000
+};
+
+const COTTON_EYED_JOE: Song = {
+   event: 'at-bat',
+   songFile: 'cottonjoe.mp3',
+   label: 'Rednex - Cotton Eyed Joe',
+   startAt: 0
+};
+const FRIDAY: Song = {
+   event: 'at-bat',
+   songFile: 'friday.mp3',
+   label: 'Rebecca Black - Friday',
+   startAt: 44
+};
+
+function preProcessPlayers(PLAYERS: IPlayer[]) {
+   console.log('players ==', PLAYERS);
+   if (PLAYERS == null) return [];
    return PLAYERS.map(p => {
       p.songs = [];
 
@@ -69,6 +99,9 @@ function preProcessPlayers() {
       ];
 
       p.lastName = p.name.split(' ')[1];
+      p.firstName = p.name.split(' ')[0];
+      p.image = `${p.firstName.toLowerCase()}.jpg`;
+      console.log(p.image);
       return p;
    }).sort((a, b) => a.lastName.localeCompare(b.lastName));
 }
@@ -78,7 +111,8 @@ export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
    const [currentSong, setCurrentSong] = useState<Song>(null);
    const [currentPlayer, setCurrentPlayer] = useState<IPlayer>(null);
    const [isPlaying, setIsPlaying] = useState<boolean>(false);
-   const sortedPlayers = useMemo(() => preProcessPlayers(), []);
+   const { players } = useContext(PlayersContext);
+   const sortedPlayers = useMemo(() => preProcessPlayers(players), [players]);
    const theme = useKittenTheme();
    const headerStyle = (
       flex: TextStyle['flex'],
@@ -134,9 +168,24 @@ export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
          <Layout
             style={{
                flex: 1,
-               backgroundColor: theme['background-basic-color-1']
+               backgroundColor: theme['background-basic-color-1'],
+               margin: 'auto',
+               maxWidth: 1000,
+               width: '100%'
             }}
          >
+            {/* <View
+               style={{
+                  width: '100%',
+                  maxWidth: 800,
+                  margin: 'auto',
+                  borderLeftColor: theme['border-basic-color-5'],
+                  borderRightColor: theme['border-basic-color-5'],
+                  borderLeftWidth: 1,
+                  borderRightWidth: 1,
+                  flex: 1
+               }}
+            > */}
             <Toolbar title='Player Songs' />
             {header()}
             <FlatList
@@ -150,6 +199,7 @@ export const PlayerSongsScreen: React.FC<PlayerSongsScreenProps> = ({
             <SongPlayer />
             {/* {currentPlayer && <PlayerLink />} */}
             {currentPlayer && <SongList />}
+            {/* </View> */}
          </Layout>
       </SongContext.Provider>
    );

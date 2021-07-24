@@ -1,12 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@ui-kitten/components';
 import React, { useContext } from 'react';
-import { View } from 'react-native';
-import TextTicker from 'react-native-text-ticker';
+import { Platform, View } from 'react-native';
+//import TextTicker from 'react-native-text-ticker';
 import { useKittenTheme } from '../../../components/use-kitten-theme-wrapper';
 import { SongContext } from '../player-songs.screen';
 import { statusFromEvent } from '../utils/status-from-event';
 import { EventIcon } from './event-icon';
+//@ts-ignore
+import { SongTitleTicker } from './SongTitleTicker';
 
 export const CurrentSongDetail: React.FC = ({ children }) => {
    const { currentSong } = useContext(SongContext);
@@ -53,36 +54,6 @@ export const CurrentSongDetail: React.FC = ({ children }) => {
                No Song Selected
             </Text>
          )}
-      </View>
-   );
-};
-interface SongTitleTickerProps {
-   title: string;
-}
-const SongTitleTicker: React.FC<SongTitleTickerProps> = ({
-   children,
-   title
-}) => {
-   return (
-      <View style={{ flexDirection: 'row' }}>
-         <Ionicons
-            name='ios-musical-notes'
-            size={18}
-            color='white'
-            style={{ marginRight: 4 }}
-         />
-         <View style={{ flex: 1 }}>
-            <TextTicker
-               style={{ color: 'white', fontWeight: 'bold' }}
-               duration={8000}
-               loop
-               bounce
-               repeatSpacer={50}
-               marqueeDelay={1000}
-            >
-               {title}
-            </TextTicker>
-         </View>
       </View>
    );
 };

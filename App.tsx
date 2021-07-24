@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
 import { StatusBar } from 'expo-status-bar';
 import AppLoading from 'expo-app-loading';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { LogBox, Platform, StyleSheet, View, YellowBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -15,32 +15,46 @@ import { useAppStorageInit } from './src/app-storage/utils';
 import UIProvider from './src/components/ui-provider';
 import { HomeNavigator } from './src/screens/home/home.navigator';
 import { DimensionsProvider } from './src/components/dimensions-provider';
+import { IPlayer } from './src/data/player-data';
 
 enableScreens();
-
+export const PlayersContext = React.createContext<{ players: IPlayer[] }>(null);
 export default function App() {
    const { isReady, initOnLaunch } = useAppStorageInit();
-
+   const [doneLoadingAssets, setDoneLoadingAssets] = useState<boolean>(false);
+   const [players, setPlayers] = useState<IPlayer[]>(null);
+   const ctxPlayers = useMemo(() => players, [players]);
    useEffect(() => {
       initOnLaunch();
+      fetch('https://up-the-middle.web.app/players.json?uid=12345')
+         .then(response => response.json())
+         .then(data => {
+            console.log(data);
+            setPlayers([...data]);
+         })
+         .finally(() => {
+            setDoneLoadingAssets(true);
+         });
    }, []);
 
-   if (!isReady) {
+   if (!doneLoadingAssets) {
       return <AppLoading />;
    }
 
    return (
-      <NavigationContainer>
-         <SafeAreaProvider>
-            <UIProvider>
-               <DimensionsProvider>
-                  <MasterStatusBar />
-                  <HomeNavigator />
-                  <MasterBottomBar />
-               </DimensionsProvider>
-            </UIProvider>
-         </SafeAreaProvider>
-      </NavigationContainer>
+      <PlayersContext.Provider value={{ players: players }}>
+         <NavigationContainer>
+            <SafeAreaProvider>
+               <UIProvider>
+                  <DimensionsProvider>
+                     <MasterStatusBar />
+                     <HomeNavigator />
+                     <MasterBottomBar />
+                  </DimensionsProvider>
+               </UIProvider>
+            </SafeAreaProvider>
+         </NavigationContainer>
+      </PlayersContext.Provider>
    );
 }
 
